@@ -1,5 +1,6 @@
 #include "pipe_networking.h"
-
+#define READ 0
+#define WRITE 1
 
 /*=========================
   server_handshake
@@ -25,5 +26,20 @@ int server_handshake(int *to_client) {
   returns the file descriptor for the downstream pipe.
   =========================*/
 int client_handshake(int *to_server) {
+  char private[20];
+  int fifo, wkp;
+  char message[20];
+
+  sprintf(private, "private_pipe_%d", getpid());
+  mkfifo(private, 0644);
+  fifo = open(private, 0);
+  read(fifo, &message, sizeof(message));
+
+  wkp = open("well_known_pipe", 0);
+  write(wkp, &private, sizeof(private));
+
+  close(fifo);
+  write(wkp, &message, sizeof(message));
+
   return 0;
 }
