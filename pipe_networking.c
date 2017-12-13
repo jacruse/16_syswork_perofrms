@@ -12,6 +12,16 @@
   returns the file descriptor for the upstream pipe.
   =========================*/
 int server_handshake(int *to_client) {
+  char message[20];
+  int fifo, wkp;
+  mkfifo("well_known_pipe", 0);
+  wkp = open("well_known_pipe", 0);
+  fifo = *to_client;
+  write(fifo, "hello!", sizeof(char *));
+  read(wkp, &message, sizeof(message));
+
+  close(wkp);
+
   return 0;
 }
 
@@ -33,13 +43,12 @@ int client_handshake(int *to_server) {
   sprintf(private, "private_pipe_%d", getpid());
   mkfifo(private, 0644);
   fifo = open(private, 0);
-  read(fifo, &message, sizeof(message));
-
+  //read(fifo, &message, sizeof(message));
   wkp = open("well_known_pipe", 0);
-  write(wkp, &private, sizeof(private));
-
+  *to_server = fifo;
   close(fifo);
-  write(wkp, &message, sizeof(message));
-
-  return 0;
+  write(wkp, private, sizeof(private));
+  read(fifo, message, 0);
+  write(wkp, message, sizeof(message));
+  return wkp;
 }
