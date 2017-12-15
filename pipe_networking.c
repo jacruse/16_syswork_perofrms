@@ -17,7 +17,7 @@ int server_handshake(int *to_client) {
   int fifo, wkp;
 
   //sets up wkp and blocks until sent data from client
-  if (mkfifo("well_known_pipe", 0666) == -1) {
+  if (mkfifo("well_known_pipe", 0600) == -1) {
     printf("1: %s\n", strerror(errno));
     exit(0);
   }
@@ -67,7 +67,7 @@ int client_handshake(int *to_server) {
   *to_server = wkp;
 
   //client pipe is set up
-  mkfifo(private, 0666);
+  mkfifo(private, 0600);
   fifo = open(private, 0);
 
   //read data from wkp to confirm it passed successfully
